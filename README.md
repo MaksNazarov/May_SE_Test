@@ -28,5 +28,5 @@ docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:4-manag
     to install project Python dependencies
 5. Run
     ```
-    python main.py
+    python client_chat.py --username your_desired_username
     ```
