@@ -1,9 +1,11 @@
 import argparse
 import pika
 import threading
+import sys
 
 
 MAIN_CHANNEL_NAME = "main"
+stop_event = threading.Event()
 
 
 def consumer():
@@ -19,7 +21,16 @@ def consumer():
         print(f"[{channel_name}] {body.decode()}")
 
     channel.basic_consume(queue, callback, auto_ack=True)
-    channel.start_consuming()
+
+    print(f"Listening to [{channel_name}]...")
+
+    try:
+        while not stop_event.is_set():
+            conn.process_data_events(time_limit=1)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        conn.close()
 
 
 def parse_args():
@@ -31,17 +42,24 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
 
-    threading.Thread(target=consumer).start()
+    consumer_thread = threading.Thread(target=consumer)
+    consumer_thread.daemon = True
+    consumer_thread.start()
 
     conn = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
     channel = conn.channel()
     channel.exchange_declare(MAIN_CHANNEL_NAME, 'fanout')
 
-    print(f"Welcome to channel [{MAIN_CHANNEL_NAME}]!")
-    while True:
-        try:
+    print(f"Welcome to channel [{MAIN_CHANNEL_NAME}]! (Press Ctrl+C to exit)")
+    try:
+        while True:
             msg = input()
             channel.basic_publish(MAIN_CHANNEL_NAME, '', f"[{args.username}] {msg}".encode())
-        except KeyboardInterrupt:
-            print("\nSession ended")
-            break
+    except KeyboardInterrupt:
+        print("\nShutting down...")
+    finally:
+        stop_event.set()
+        consumer_thread.join(timeout=1)
+        conn.close()
+        print("Session ended")
+        sys.exit(0)
