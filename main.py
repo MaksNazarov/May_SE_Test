@@ -12,6 +12,7 @@ stop_event = threading.Event()
 
 
 def consumer(channel_name):
+    """Create a short-lived connection to the channel and set up required print callback."""
     global stop_event
 
     conn = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
@@ -37,7 +38,7 @@ def consumer(channel_name):
 
 
 def switch_channel(new_channel):
-    """Stops current consumer and creates a new one for different channel"""
+    """Stop current consumer and create a new one for different channel."""
     global consumer_thread, current_channel, stop_event
 
     print(f"Switching to channel [{new_channel}]...")
@@ -63,21 +64,21 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
 
-    switch_channel(INITIAL_CHANNEL)
+    switch_channel(INITIAL_CHANNEL) # set up consumer for default channel
 
     conn = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
     channel = conn.channel()
-    channel.exchange_declare(INITIAL_CHANNEL, 'fanout')
+    channel.exchange_declare(INITIAL_CHANNEL, 'fanout') # connect to default channel
 
     print(f"Welcome to channel [{current_channel}]!")
     try:
         while True:
             try:
                 msg = input().strip()
-                if msg.startswith("!switch"):
+                if msg.startswith("!switch"): # switch channel
                     _, new_channel = msg.split(maxsplit=1)
                     switch_channel(new_channel)
-                else:
+                else: # broadcast passed message to a current channel
                     channel.basic_publish(
                         exchange=current_channel,
                         routing_key='',
@@ -88,7 +89,7 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("\nShutting down...")
     finally:
-        stop_event.set()
+        stop_event.set() # stop signal for consumer thread
         if consumer_thread:
             consumer_thread.join(timeout=1)
         conn.close()
