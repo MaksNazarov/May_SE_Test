@@ -20,13 +20,12 @@ docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:4-manag
 
 1. Start RabbitMQ container.
 2. Switch to your virtual Python environment
-3. Enter the project directory
-4. Run
+3. Run
     ```
     pip install -r requirements.txt
     ```
     to install project Python dependencies
-5. Run
+4. From project directory, run:
     ```
     python client_chat.py --username your_desired_username
     ```

@@ -5,6 +5,7 @@ import sys
 
 
 INITIAL_CHANNEL = "main"
+HOST = 'localhost'
 
 current_channel = INITIAL_CHANNEL
 consumer_thread = None
@@ -15,7 +16,7 @@ def consumer(channel_name):
     """Create a short-lived connection to the channel and set up required print callback."""
     global stop_event
 
-    conn = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    conn = pika.BlockingConnection(pika.ConnectionParameters(HOST))
     channel = conn.channel()
     channel.exchange_declare(channel_name, 'fanout')
     queue = channel.queue_declare('', exclusive=True).method.queue
@@ -66,7 +67,7 @@ if __name__ == '__main__':
 
     switch_channel(INITIAL_CHANNEL) # set up consumer for default channel
 
-    conn = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    conn = pika.BlockingConnection(pika.ConnectionParameters(HOST))
     channel = conn.channel()
     channel.exchange_declare(INITIAL_CHANNEL, 'fanout') # connect to default channel
 
