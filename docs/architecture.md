@@ -11,6 +11,9 @@
 * chat_client.py — основной клиентский скрипт.
 * Зависит от сервера RabbitMQ, расположенного по адресу localhost (по умолчанию).
 
+### Usecase diagram:
+<img src="usecase_diagram.png" width="50%" alt="Use Case Diagram">
+
 ### Компоненты:
 * main loop - считывает пользовательский ввод и публикует сообщения или переключает канал.
 * publish method - отправляет сообщение в заданный канал через RabbitMQ.

@@ -9,6 +9,6 @@
 sudo  docker run -d --hostname my-rabbit --name some-rabbit -p 5672:5672 rabbitmq
 
 # And after we can run the programm with arguments (name and starting channel)
-python3 chat.py --name Alice --channel lobby
+python3 chat_client.py --name Alice --channel lobby
 
 ```
